@@ -1,0 +1,69 @@
+<style>
+  body { position: relative; margin: 0; padding:0;}
+  img, div {
+    position: absolute;
+    z-index: 10;
+  }
+  img { z-index: 1;}
+
+  div.container {
+          position: relative;
+          height: 638px;
+          width: 1016px; 
+        }
+        .card1,.card2 {
+          position: absolute;
+          top:0;
+          left: 0;
+          height: 638px;
+          width: 1016px; 
+          z-index: 2;
+        }
+        img.qrcode {
+          z-index: 11;
+          width: 252px;
+          bottom: 78px;
+          right: 0;
+          float:right;
+        }
+        div.line1, div.line2, div.line3, div.line4left, div.line4right, .profile_photo,
+        div.line5, div.line6, div.line7 {
+          position: absolute;
+          font-weight: bold;
+          color: #000;
+          font-size: 2.2rem;
+          font-family: sans-serif;
+          text-transform: uppercase;
+          z-index: 99;
+        }
+        .profile_photo { width: 253px; top: 231px; left: 18px; }
+        div.line1 { top: 225px; left: 402px; }
+        div.line2 { top: 276px; left: 480px; }
+        div.line3 { top: 328px; left: 446px; }
+        div.line4left { bottom: 18px; left: 188px; font-size: 3rem; color: black; }
+        div.line4right { bottom: 18px; right: 22px; font-size: 3rem; color: black; }
+        div.line5 { top: 33px; left: 338px; }
+        div.line6 { top: 83px; left: 338px; }
+        div.line7 { top: 133px; left: 338px; }
+        .page2 { top: 0;}
+
+</style>
+
+
+  <div class="container">
+    <img class="card1" src="<%= page1 %>" alt="Card jpg" />
+    <img class="qrcode" src="<%= qr_code %>" alt="QR Code" />
+    <img class="profile_photo" src="<%= profile_photo %>" alt="Profile Photo" />
+
+    <div class="line1"><%= name %></div>
+    <div class="line2"><%= category %></div>
+    <div class="line3"><%= user_id %></div>
+    <div class="line4left"><%= doa %></div>
+    <div class="line4right"><%= valid_upto %></div>
+  </div>
+  <div class="container page2">
+    <img class="card2" src="<%= page2 %>" alt="Card jpg" />  
+    <div class="line5"> Name: <%= name %></div>
+    <div class="line6"> Mobile: <%= mobile %></div>
+    <div class="line7"> Address: <%= address %></div>
+  </div>
