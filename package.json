@@ -6,7 +6,8 @@
   "author": "Kanhai Lal Murmu",
   "scripts": {
     "postinstall": "patch-package && npm run scss",
-    "start": "npm run scss && nodemon app.js",
+    "start": "npm run scss && node app.js",
+    "dev": "npm run scss && nodemon app.js",
     "test": "nyc mocha --timeout=60000 --exit",
     "lint": "eslint \"**/*.js\"",
     "prepare": "husky install",
