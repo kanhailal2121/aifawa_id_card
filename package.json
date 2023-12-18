@@ -5,7 +5,7 @@
   "license": "MIT",
   "author": "Kanhai Lal Murmu",
   "scripts": {
-    "start": "npm run scss && node app.js",
+    "start": "node app.js",
     "dev": "npm run scss && nodemon app.js",
     "test": "nyc mocha --timeout=60000 --exit",
     "lint": "eslint \"**/*.js\"",
