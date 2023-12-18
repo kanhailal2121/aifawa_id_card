@@ -5,7 +5,7 @@ const path = require('path');
 const express = require('express');
 const compression = require('compression');
 const bodyParser = require('body-parser');
-const logger = require('morgan');
+// const logger = require('morgan');
 const errorHandler = require('errorhandler');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
@@ -38,12 +38,12 @@ console.log('Run this app using "npm start" to include sass/scss/css builds.\n')
 /**
  * Express configuration.
  */
-app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
+// app.set('host', process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0');
 app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(compression());
-app.use(logger('dev'));
+// app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(limiter);
