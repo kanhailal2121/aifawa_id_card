@@ -16,7 +16,7 @@ exports.browse = async (req, res) => {
   let localPath = __dirname + `/..`;
   const folderPath = `${localPath}/public/assets/`;
 
-  let fileInfo = '';
+  let fileInfo = `Looking for files under ${folderPath} \n\n`;
   fs.readdir(folderPath, (err, files) => {
     if (err) {
       console.error('Error reading directory:', err);
