@@ -8,17 +8,8 @@ const path = require('path');
 const moment = require('moment');
 const axios = require('axios');
 const api_url = process.env.DATA_URL;
-// const puppeteer = require('puppeteer');
-// const path = require("path");
 const pdf = require('html-pdf');
 var QRCode = require('qrcode')
-
-exports.index = (req, res) => {
-  res.render('home', {
-    title: 'Home'
-  });
-};
-
 
 exports.generate = async (req, res) => {
 
@@ -45,10 +36,10 @@ exports.generate = async (req, res) => {
     location: 'Nagpur',
     name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
     user_id: user_id,
-    page1: process.env.BASE_URL+`/images/p1.jpg`,
-    page2: process.env.BASE_URL+`/images/p2.jpg`,
-    // page1: `http://localhost/php-qrcode/examples/assets/p1.jpg`,
-    // page2: `http://localhost/php-qrcode/examples/assets/p2.jpg`,
+    // page1: process.env.BASE_URL+`/images/p1.jpg`,
+    // page2: process.env.BASE_URL+`/images/p2.jpg`,
+    page1: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p1.jpg?v=1702962510492`,
+    page2: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p2.jpg?v=1702962403702`,
     // qr_code: `http://localhost/php-qrcode/examples/qrcode-${user_id}.jpg`,
     qr_code: '',
     profile_photo: api_data.photo,

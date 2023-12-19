@@ -5,35 +5,19 @@ const path = require('path');
 const express = require('express');
 const compression = require('compression');
 const bodyParser = require('body-parser');
-// const logger = require('morgan');
-const errorHandler = require('errorhandler');
 const dotenv = require('dotenv');
-const rateLimit = require('express-rate-limit');
 
-// const upload = multer({ dest: path.join(__dirname, 'uploads') });
+const idCardController = require('./controllers/idCard');
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
  */
 dotenv.config({ path: '.env' });
 
-
-// Consider adding a proxy such as cloudflare for production.
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
-
-const idCardController = require('./controllers/idCard');
-
-
 /**
  * Create Express server.
  */
 const app = express();
-console.log('Run this app using "npm start" to include sass/scss/css builds.\n');
 
 /**
  * Express configuration.
@@ -43,10 +27,8 @@ app.set('port', process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(compression());
-// app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(limiter);
 app.disable('x-powered-by');
 
 // Function to serve all static files
@@ -54,6 +36,11 @@ app.disable('x-powered-by');
 app.use(express.static('public'));
 app.use('/images', express.static('images'));
 
+app.get('/', (req, res) => {
+  res.render('home', {
+    title: 'Home'
+  });
+});
 app.get('/idcard/generate/:user_id', idCardController.generate);
 
 /**
@@ -67,7 +54,7 @@ app.use((req, res, next) => {
 
 if (process.env.NODE_ENV === 'development') {
   // only use in development
-  app.use(errorHandler());
+  // app.use(errorHandler());
 } else {
   app.use((err, req, res) => {
     console.error(err);
