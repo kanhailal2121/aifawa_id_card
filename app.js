@@ -6,14 +6,17 @@ const express = require('express');
 const compression = require('compression');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
+// const errorHandler = require('errorhandler');
 
-const idCardController = require('./controllers/idCard');
 
 /**
  * Load environment variables from .env file, where API keys and passwords are configured.
- */
+*/
 dotenv.config({ path: '.env' });
 
+
+
+const idCardController = require('./controllers/idCard');
 /**
  * Create Express server.
  */
@@ -37,11 +40,17 @@ app.use(express.static('public'));
 app.use('/images', express.static('images'));
 
 app.get('/', (req, res) => {
-  res.render('home', {
-    title: 'Home'
-  });
+  console.log('Loaded Homepage');
+  res.render('home', { title: 'Home' });
 });
-app.get('/idcard/generate/:user_id', idCardController.generate);
+app.get('/download-all', (req,res)=>{
+  console.log('Helllo download');
+  res.end('Yello!!');
+})
+// app.get('/idcard/generate/:user_id', idCardController.generate);
+app.get('/idcard/browse', idCardController.browse);
+app.get('/idcard/download', idCardController.downloadAll);
+app.get('/idcard/:user_id', idCardController.generate);
 
 /**
  * Error Handler.

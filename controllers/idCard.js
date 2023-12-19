@@ -9,11 +9,50 @@ const moment = require('moment');
 const axios = require('axios');
 const api_url = process.env.DATA_URL;
 const pdf = require('html-pdf');
-var QRCode = require('qrcode')
+var QRCode = require('qrcode');
+const archiver = require('archiver');
+
+exports.browse = async (req, res) => {
+  let localPath = __dirname + `/..`;
+  const folderPath = `${localPath}/public/assets/`;
+
+  let fileInfo = '';
+  fs.readdir(folderPath, (err, files) => {
+    if (err) {
+      console.error('Error reading directory:', err);
+      res.status(500).end('Error reading directory');
+      return;
+    }
+
+
+    files.forEach((file) => {
+      
+      // const filePath = path.join(folderPath, file);
+      // let size = fs.stat(filePath, async (err, stats) => {
+      //   if (err) {
+      //     console.error('Error getting file stats:', err);
+      //     res.status(500).end('Error getting file stats');
+      //     return;
+      //   }
+        
+      //   if (stats.isFile()) {
+      //     return stats.size;
+      //     // fileInfo += `File Size: ${stats.size} bytes\n`;
+      //   }
+      // });
+      fileInfo += `------------------------- File Name: ${file}\n`;
+      // fileInfo += `File Size: ${size} bytes\n`;
+      fileInfo += '-------------------------\n';
+    });
+    // Send the file info as the response once all files have been processed
+    res.end('The files in directory are : \n'+fileInfo);
+  });
+};
 
 exports.generate = async (req, res) => {
 
   let user_id = req.params.user_id;
+  // console.log(`the user id is ${user_id}`);
   let api_data = await axios.get(api_url+user_id).then(resp => {
       // console.log(resp.data);
       return resp.data;
@@ -57,7 +96,7 @@ exports.generate = async (req, res) => {
     res.render('idcard', parameters);
     generateFeedbackPdf(parameters, user_id);
   }) 
-  
+  // res.end('id generated');
 
 };
 
@@ -78,12 +117,39 @@ const generateFeedbackPdf = async (pdfData, user_id) => {
     };
     let pdf_path = `${localPath}/public/assets/aifawa-${user_id}.pdf`;
     // let pdf_path = `pdffff-${user_id}.pdf`;
+
     await pdf.create(ejsData, options).toFile(pdf_path, function(err, res) {
       if (err) return console.log(err);
-      console.log(res); // { filename: '/app/businesscard.pdf' }
+      // console.log(res); // { filename: '/app/businesscard.pdf' }
     });
+
     return pdf_path;
   } catch (err) {
-    throw new Error(err);
+    // throw new Error(err);
+    console.log(err);
   }
 };
+
+exports.downloadAll = async (req, res) => {
+  try {
+    // Create a new Archivers instance
+    const archive = archiver('zip');
+
+    // Define the base directory for assets
+    const assetsDir = path.join(__dirname, '..', 'public', 'assets');
+
+    // Add all files in the assets directory to the archive
+    await archive.directory(assetsDir, false);
+
+    // Set the response headers for file download
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename=assets.zip');
+
+    // Pipe the archive to the response stream and send it
+    archive.pipe(res);
+    archive.finalize();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error generating ZIP file');
+  }
+}
