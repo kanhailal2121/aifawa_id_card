@@ -10,7 +10,6 @@
     "devcss": "npm run scss && nodemon app.js"
   },
   "dependencies": {
-    "archiver": "^6.0.1",
     "axios": "^1.4.0",
     "body-parser": "^1.20.2",
     "compression": "^1.7.4",
@@ -25,7 +24,6 @@
     "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "nodemon": "^3.0.2",
-    "puppeteer": "^21.1.0",
     "qrcode": "^1.5.3",
     "sass": "^1.69.5"
   },

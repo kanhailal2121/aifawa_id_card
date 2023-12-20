@@ -7,50 +7,55 @@ const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
 const axios = require('axios');
-const api_url = process.env.DATA_URL;
 const pdf = require('html-pdf');
 var QRCode = require('qrcode');
-const archiver = require('archiver');
+const api_url = process.env.DATA_URL;
 
-exports.browse = async (req, res) => {
-  let localPath = __dirname + `/..`;
-  const folderPath = `${localPath}/public/assets/`;
-
-  let fileInfo = `Looking for files under ${folderPath} \n\n`;
-  fs.readdir(folderPath, (err, files) => {
-    if (err) {
-      console.error('Error reading directory:', err);
-      res.status(500).end('Error reading directory');
-      return;
-    }
-
-
-    files.forEach((file) => {
-      
-      // const filePath = path.join(folderPath, file);
-      // let size = fs.stat(filePath, async (err, stats) => {
-      //   if (err) {
-      //     console.error('Error getting file stats:', err);
-      //     res.status(500).end('Error getting file stats');
-      //     return;
-      //   }
-        
-      //   if (stats.isFile()) {
-      //     return stats.size;
-      //     // fileInfo += `File Size: ${stats.size} bytes\n`;
-      //   }
-      // });
-      fileInfo += `------------------------- File Name: ${file}\n`;
-      // fileInfo += `File Size: ${size} bytes\n`;
-      fileInfo += '-------------------------\n';
-    });
-    // Send the file info as the response once all files have been processed
-    res.end('The files in directory are : \n'+fileInfo);
+// exactly similar to generate method
+exports.viewId = async (req, res) => {
+  let user_id = req.params.user_id;
+  let api_data = await axios.get(api_url+user_id).then(resp => {
+      return resp.data;
   });
+
+  // console.log('the api data ',api_data);
+  let qrData = process.env.PROFILE_URL+user_id;
+  let qrOptions = {
+    errorCorrectionLevel: 'H',
+    type: 'image/jpeg',
+    quality: 0.3,
+    margin: 1,
+    color: {
+      dark:"#000000",
+      light:"#FFFFFF"
+    }
+  };
+  let parameters = {
+      date: moment().add(7,'days').format('DD-MM-YYYY'),
+      time: `10:00AM - 12:00PM`,
+      location: 'Mumbai',
+      name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
+      user_id: user_id,
+      page1: process.env.BASE_URL+`/images/p1.jpg`,
+      page2: process.env.BASE_URL+`/images/p2.jpg`,
+      qr_code: '',
+      profile_photo: api_data.photo,
+      mobile: api_data.phone_number,
+      address: api_data.address || '444 Ratan Apartments, Bank road, Mumbai Maharashtra',
+      category: api_data.artist_category || 'Test Artist',
+      doa: api_data.membership_start_date || '---',
+      valid_upto: api_data.membership_end_date || '---',
+    };
+    
+  QRCode.toDataURL(qrData, qrOptions, function (err, url) { 
+    if (err) throw err; 
+    parameters.qr_code = url; 
+    res.render('idcard', parameters);
+  }) 
+
 };
 
 exports.generate = async (req, res) => {
-
   let user_id = req.params.user_id;
   // console.log(`the user id is ${user_id}`);
   let api_data = await axios.get(api_url+user_id).then(resp => {
@@ -72,35 +77,34 @@ exports.generate = async (req, res) => {
   let parameters = {
     date: moment().add(7,'days').format('DD-MM-YYYY'),
     time: `10:00AM - 12:00PM`,
-    location: 'Nagpur',
+    location: 'Mumbai',
     name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
     user_id: user_id,
-    // page1: process.env.BASE_URL+`/images/p1.jpg`,
-    // page2: process.env.BASE_URL+`/images/p2.jpg`,
-    page1: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p1.jpg?v=1702962510492`,
-    page2: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p2.jpg?v=1702962403702`,
+    page1: process.env.BASE_URL+`/images/p1.jpg`,
+    page2: process.env.BASE_URL+`/images/p2.jpg`,
+    // page1: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p1.jpg?v=1702962510492`,
+    // page2: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p2.jpg?v=1702962403702`,
     // qr_code: `http://localhost/php-qrcode/examples/qrcode-${user_id}.jpg`,
     qr_code: '',
     profile_photo: api_data.photo,
     mobile: api_data.phone_number,
-    address: api_data.address ||'444 Ratan Apartments, Bank road, nagpur maharashtra',
-    category: api_data.category || 'Test Singer',
-    doa: '23/11/2023',
-    valid_upto: '22/11/2024',
+    address: api_data.address || '444 Ratan Apartments, Bank road, Mumbai Maharashtra',
+    category: api_data.artist_category || 'Test Artist',
+    doa: api_data.membership_start_date || '---',
+    valid_upto: api_data.membership_end_date || '---',
   };
 
   QRCode.toDataURL(qrData, qrOptions, function (err, url) { 
     if (err) throw err; 
     parameters.qr_code = url; 
-
-    res.render('idcard', parameters);
-    generateFeedbackPdf(parameters, user_id);
-  }) 
-  // res.end('id generated');
-
+    // generate pdf and force download
+    generateFeedbackPdf(res, parameters, user_id);
+  });
+  
 };
 
-const generateFeedbackPdf = async (pdfData, user_id) => {
+// generate pdf and force download
+const generateFeedbackPdf = async (res, pdfData, user_id) => {
   let err, userData;
   try {
     let localPath = __dirname + `/..`;
@@ -115,21 +119,29 @@ const generateFeedbackPdf = async (pdfData, user_id) => {
       // Page options
       "border": "0",             // default is 0, units: mm, cm, in, px
     };
-    let pdf_path = `${localPath}/public/assets/aifawa-${user_id}.pdf`;
+    let filename = `aifawa-${user_id}.pdf`;
+    let pdf_path = `${localPath}/public/assets/${filename}`;
     // let pdf_path = `pdffff-${user_id}.pdf`;
 
-    await pdf.create(ejsData, options).toFile(pdf_path, function(err, res) {
-      if (err) return console.log(err);
-      // console.log(res); // { filename: '/app/businesscard.pdf' }
+    // await pdf.create(ejsData, options).toFile(pdf_path, function(err, res) {
+    //   if (err) return console.log(err);
+    //   // console.log(res); // { filename: '/app/businesscard.pdf' }
+    // });
+
+    await pdf.create(ejsData, options).toStream(function(err, stream){
+      res.attachment(filename);
+      stream.pipe(res);
+      stream.on("end", ()=>{ res.end(); });
     });
 
     return pdf_path;
   } catch (err) {
     // throw new Error(err);
-    console.log(err);
+    console.error('Error generating PDF:', err);
   }
 };
 
+//to zip then download all the files inside public/assets 
 exports.downloadAll = async (req, res) => {
   try {
     // Create a new Archivers instance

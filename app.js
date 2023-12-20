@@ -43,14 +43,15 @@ app.get('/', (req, res) => {
   console.log('Loaded Homepage');
   res.render('home', { title: 'Home' });
 });
-app.get('/download-all', (req,res)=>{
-  console.log('Helllo download');
-  res.end('Yello!!');
+app.get('/test', (req,res)=>{
+  console.log('Loaded Test Page');
+  res.end('Yello!! This is a Test Page.');
 })
-// app.get('/idcard/generate/:user_id', idCardController.generate);
-app.get('/idcard/browse', idCardController.browse);
+
+// app.get('/idcard/browse', idCardController.browse);
 app.get('/idcard/download', idCardController.downloadAll);
 app.get('/idcard/:user_id', idCardController.generate);
+app.get('/idcard/view/:user_id', idCardController.viewId);
 
 /**
  * Error Handler.
