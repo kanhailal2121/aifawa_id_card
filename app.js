@@ -50,8 +50,11 @@ app.get('/test', (req,res)=>{
 
 // app.get('/idcard/browse', idCardController.browse);
 app.get('/idcard/download', idCardController.downloadAll);
-app.get('/idcard/:user_id', idCardController.generate);
-app.get('/idcard/view/:user_id', idCardController.viewId);
+// app.get('/idcard/:user_id', idCardController.generate);//19,32
+app.get('/genz-idcard/:user_id', idCardController.generateGenZCard);//19,32
+app.get('/member-idcard/:user_id', idCardController.generateMemberCard);//19,32
+app.get('/view/genz-idcard/:user_id', idCardController.viewGenzCard);
+app.get('/view/member-idcard/:user_id', idCardController.viewMemberCard);
 
 /**
  * Error Handler.

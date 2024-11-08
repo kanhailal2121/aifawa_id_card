@@ -11,8 +11,20 @@ const pdf = require('html-pdf');
 var QRCode = require('qrcode');
 const api_url = process.env.DATA_URL;
 
+exports.viewMemberCard = async (req, res) => {
+  let frontImg = 'p1.jpg';
+  let backImg = 'p2.jpg';
+  await viewId(req, res, frontImg, backImg);
+}
+
+exports.viewGenzCard = async (req, res) => {
+  let frontImg = 'p3.jpg';
+  let backImg = 'p4.jpg';
+  await viewId(req, res, frontImg, backImg);
+}
+
 // exactly similar to generate method
-exports.viewId = async (req, res) => {
+const viewId = async (req, res, frontImg, backImg) => {
   let user_id = req.params.user_id;
   let api_data = await axios.get(api_url+user_id).then(resp => {
       return resp.data;
@@ -36,8 +48,8 @@ exports.viewId = async (req, res) => {
       location: 'Mumbai',
       name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
       user_id: user_id,
-      page1: process.env.BASE_URL+`/images/p1.jpg`,
-      page2: process.env.BASE_URL+`/images/p2.jpg`,
+      page1: process.env.BASE_URL+`/images/${frontImg}`,
+      page2: process.env.BASE_URL+`/images/${backImg}`,
       qr_code: '',
       profile_photo: api_data.photo,
       mobile: api_data.phone_number,
@@ -55,7 +67,21 @@ exports.viewId = async (req, res) => {
 
 };
 
-exports.generate = async (req, res) => {
+// Generate ID card for normal users
+exports.generateMemberCard = async (req, res) => {
+  let frontImg = 'p1.jpg';
+  let backImg = 'p2.jpg';
+  generateIdCard(req, res, frontImg, backImg);
+}
+
+// Generate ID for Genz users
+exports.generateGenZCard = async (req, res) => {
+  let frontImg = 'p3.jpg';
+  let backImg = 'p4.jpg';
+  generateIdCard(req, res, frontImg, backImg);
+}
+
+const generateIdCard = async (req, res, frontImg, backImg) => {
   let user_id = req.params.user_id;
   // console.log(`the user id is ${user_id}`);
   let api_data = await axios.get(api_url+user_id).then(resp => {
@@ -80,8 +106,8 @@ exports.generate = async (req, res) => {
     location: 'Mumbai',
     name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
     user_id: user_id,
-    page1: process.env.BASE_URL+`/images/p1.jpg`,
-    page2: process.env.BASE_URL+`/images/p2.jpg`,
+    page1: process.env.BASE_URL+`/images/${frontImg}`,
+    page2: process.env.BASE_URL+`/images/${backImg}`,
     // page1: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p1.jpg?v=1702962510492`,
     // page2: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p2.jpg?v=1702962403702`,
     // qr_code: `http://localhost/php-qrcode/examples/qrcode-${user_id}.jpg`,
