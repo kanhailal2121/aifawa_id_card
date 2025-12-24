@@ -12,73 +12,87 @@ var QRCode = require('qrcode');
 const api_url = process.env.DATA_URL;
 
 exports.viewMemberCard = async (req, res) => {
-  let frontImg = 'p1.jpg';
-  let backImg = 'p2.jpg';
+  let frontImg = 'AIFAWA-front.jpg';
+  let backImg = 'AIFAWA-back.jpg';
   await viewId(req, res, frontImg, backImg);
 }
 
 exports.viewGenzCard = async (req, res) => {
-  let frontImg = 'p3.jpg';
-  let backImg = 'p4.jpg';
+  let frontImg = 'GENZ-front.jpg';
+  let backImg = 'GENZ-back.jpg';
   await viewId(req, res, frontImg, backImg);
 }
 
 // exactly similar to generate method
 const viewId = async (req, res, frontImg, backImg) => {
   let user_id = req.params.user_id;
-  let api_data = await axios.get(api_url+user_id).then(resp => {
-      return resp.data;
-  });
-
-  // console.log('the api data ',api_data);
-  let qrData = process.env.PROFILE_URL+user_id;
-  let qrOptions = {
-    errorCorrectionLevel: 'H',
-    type: 'image/jpeg',
-    quality: 0.3,
-    margin: 1,
-    color: {
-      dark:"#000000",
-      light:"#FFFFFF"
-    }
-  };
-  let parameters = {
-      date: moment().add(7,'days').format('DD-MM-YYYY'),
-      time: `10:00AM - 12:00PM`,
-      location: 'Mumbai',
-      name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
-      user_id: user_id,
-      page1: process.env.BASE_URL+`/images/${frontImg}`,
-      page2: process.env.BASE_URL+`/images/${backImg}`,
-      qr_code: '',
-      profile_photo: api_data.photo,
-      mobile: api_data.phone_number,
-      address: api_data.address || '444 Ratan Apartments, Bank road, Mumbai Maharashtra',
-      category: api_data.artist_category || 'Test Artist',
-      doa: api_data.membership_start_date || '---',
-      valid_upto: api_data.membership_end_date || '---',
-    };
+  try {
     
-  QRCode.toDataURL(qrData, qrOptions, function (err, url) { 
-    if (err) throw err; 
-    parameters.qr_code = url; 
-    res.render('idcard', parameters);
-  }) 
+    let api_data = await axios.get(api_url+user_id).then(resp => {
+        return resp.data;
+    });
+
+    // console.log('the api data ',api_data);
+    
+    let qrData = process.env.PROFILE_URL+user_id;
+    let qrOptions = {
+      errorCorrectionLevel: 'H',
+      type: 'image/jpeg',
+      quality: 0.3,
+      margin: 1,
+      color: {
+        dark:"#000000",
+        light:"#FFFFFF"
+      }
+    };
+    let parameters = generateIdCardProperties(user_id, api_data, frontImg, backImg);
+      
+    QRCode.toDataURL(qrData, qrOptions, function (err, url) { 
+      if (err) throw err; 
+      parameters.qr_code = url; 
+      res.render('idcard', parameters);
+    })
+  } catch (error) {
+    console.log('Could not fetch user data ', user_id);
+  }
 
 };
 
 // Generate ID card for normal users
 exports.generateMemberCard = async (req, res) => {
-  let frontImg = 'p1.jpg';
-  let backImg = 'p2.jpg';
+  let frontImg = 'AIFAWA-front.jpg';
+  let backImg = 'AIFAWA-back.jpg';
   generateIdCard(req, res, frontImg, backImg);
 }
 
 // Generate ID for Genz users
 exports.generateGenZCard = async (req, res) => {
-  let frontImg = 'p3.jpg';
-  let backImg = 'p4.jpg';
+  let frontImg = 'GENZ-front.jpg';
+  let backImg = 'GENZ-back.jpg';
   generateIdCard(req, res, frontImg, backImg);
+}
+
+const generateIdCardProperties = (user_id, api_data, frontImg, backImg) => {
+  return {
+    date: moment().format('DD-MM-YYYY'),
+    time: `10:00AM - 12:00PM`,
+    location: 'Mumbai',
+    name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
+    user_id: user_id,
+    page1: process.env.BASE_URL+`/images/${frontImg}`,
+    page2: process.env.BASE_URL+`/images/${backImg}`,
+    // page1: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p1.jpg?v=1702962510492`,
+    // page2: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p2.jpg?v=1702962403702`,
+    // qr_code: `http://localhost/php-qrcode/examples/qrcode-${user_id}.jpg`,
+    qr_code: '',
+    profile_photo: api_data.photo,
+    mobile: api_data.phone_number,
+    address: api_data.address || '444 Ratan Apartments, Bank road, Mumbai Maharashtra',
+    category: api_data.artist_category || 'Test Artist',
+    doa: api_data.membership_start_date || moment().format('DD-MM-YYYY'),
+    valid_upto: api_data.membership_end_date || moment().add(364,'days').format('DD-MM-YYYY'),
+  };
+
 }
 
 const generateIdCard = async (req, res, frontImg, backImg) => {
@@ -100,25 +114,7 @@ const generateIdCard = async (req, res, frontImg, backImg) => {
       light:"#FFFFFF"
     }
   };
-  let parameters = {
-    date: moment().add(7,'days').format('DD-MM-YYYY'),
-    time: `10:00AM - 12:00PM`,
-    location: 'Mumbai',
-    name: `${api_data.first_name} ${api_data.last_name}` || 'Test User',
-    user_id: user_id,
-    page1: process.env.BASE_URL+`/images/${frontImg}`,
-    page2: process.env.BASE_URL+`/images/${backImg}`,
-    // page1: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p1.jpg?v=1702962510492`,
-    // page2: `https://cdn.glitch.global/3b71fbc5-9ef0-4c02-a6c9-447b493717e7/p2.jpg?v=1702962403702`,
-    // qr_code: `http://localhost/php-qrcode/examples/qrcode-${user_id}.jpg`,
-    qr_code: '',
-    profile_photo: api_data.photo,
-    mobile: api_data.phone_number,
-    address: api_data.address || '444 Ratan Apartments, Bank road, Mumbai Maharashtra',
-    category: api_data.artist_category || 'Test Artist',
-    doa: api_data.membership_start_date || '---',
-    valid_upto: api_data.membership_end_date || '---',
-  };
+  let parameters = generateIdCardProperties(user_id, api_data, frontImg, backImg);
 
   QRCode.toDataURL(qrData, qrOptions, function (err, url) { 
     if (err) throw err; 
